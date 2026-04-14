@@ -42,7 +42,7 @@ The attack was detected by analyzing repeated TCP connection attempts from a sin
 
 ## 📸 Screenshots
 
-(Add your screenshot here in next step)
+![Detection](detection.png)
 
 ---
 
