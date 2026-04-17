@@ -32,14 +32,38 @@ nmap -sS 192.168.56.103
 
 ---
 🔍 Detection in Splunk
+## ## Detection & Analysis
+### Detection Rule (Splunk)
 
-The attack was detected by analyzing repeated TCP connection attempts from a single source IP.
+The following detection rule was created in Splunk to identify potential port scanning activity:
 
-👉 Attacker IP: **192.168.56.101**
-👉 Behavior: Multiple port scanning attempts
+- Detect multiple connection attempts from a single source IP
+- Identify abnormal spike in connections using Zeek logs (conn.log)
 
----
+### SPL Query
 
+index=zeek sourcetype=conn
+| stats count by id.orig_h
+| where count > 20
+
+### Analysis
+
+The query identifies IP addresses generating a high number of connections.
+
+- Attacker IP: 192.168.56.101
+- Observation: High number of connection attempts in a short time
+- Behavior: Multiple ports scanned across the target system
+
+This pattern is consistent with reconnaissance activity, specifically port scanning.
+
+### Detection Outcome
+
+The attack was successfully detected by correlating repeated TCP connection attempts from a single source IP.
+
+The following detection rule was created in Splunk to identify potential port scanning activity:
+
+- Detect multiple connection attempts from a single source IP
+- Identify abnormal spike in connections using Zeek logs (conn.log)
 ## 📸 Screenshots
 
 ![Detection](detection.png)
