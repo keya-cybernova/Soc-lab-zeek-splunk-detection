@@ -64,7 +64,15 @@ The source `192.168.56.101` touched **1001 distinct destination ports** — far 
   Triage steps:confirm the source isn't a sanctioned scanner → note the `REJ` states (scan found no open ports) → determine what was targeted → block and escalate if unsanctioned.
 
 .
-  --📸 Screenshots
+  ### Screenshots
+
+**Raw Zeek connection data ingested into Splunk:**
+
+![Zeek data in Splunk](detection.png)
+
+**Port scan detection — 1001 distinct ports from a single source (192.168.56.101):**
+
+![Port scan detection result](detection-result2.png)
 
 ![Detection](detection.png)
 
