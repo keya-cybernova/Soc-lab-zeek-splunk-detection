@@ -5,7 +5,7 @@ SOC lab project detecting port scanning attacks using Zeek and Splunk SIEM
  Project Overview
 
 This project demonstrates a real-world SOC (Security Operations Center) workflow where network traffic is monitored, logs are forwarded, and attacks are detected using SIEM.
- 🧩 Architecture
+ --Architecture
 
 * Ubuntu → Zeek (Network Monitoring)
 * Kali Linux → Attacker (Nmap) + Splunk Universal Forwarder
