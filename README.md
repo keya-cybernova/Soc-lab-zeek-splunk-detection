@@ -31,46 +31,46 @@ nmap -sS 192.168.56.103
 * Type: Port Scanning Attack
 
 ---
-🔍 Detection in Splunk
- Detection & Analysis
- Detection Rule (Splunk)
+🔍 ## Detection: Port Scan Detection in Splunk
+
+Detecting reconnaissance activity by identifying a single source that probes an abnormal number of destination ports.
+
+### Query
+
+spl
+index=main sourcetype=conn NOT "#"
+| rex "\S+\t\S+\t(?<src_ip>\S+)\t\S+\t(?<dst_ip>\S+)\t(?<dst_port>\S+)"
+| stats dc(dst_port) as distinct_ports by src_ip
+| where distinct_ports > 20
 
 
-The following detection rule was created in Splunk to identify potential port scanning activity:
+**Logic:** the Zeek fields weren't auto-parsed in this Splunk instance, so `rex` extracts the source IP and destination port from the raw log. The query then counts the *distinct destination ports* touched by each source. A port scan's signature is one source probing many different ports — so counting distinct ports (rather than raw connection volume) isolates scanning from normal but busy traffic.
 
-- Detect multiple connection attempts from a single source IP
-- Identify abnormal spike in connections using Zeek logs (conn.log)
+### Result
 
--- SPL Query
+| src_ip | distinct_ports |
 
-index=zeek sourcetype=conn
-| stats count by id.orig_h
-| where count > 20
+| 192.168.56.101 | 1001 |
 
--- Analysis
+The source `192.168.56.101` touched **1001 distinct destination ports** — far beyond any legitimate application behaviour. This is a clear port scan.
 
-The query identifies IP addresses generating a high number of connections.
+### Analysis
 
-- Attacker IP: 192.168.56.101
-- Observation: High number of connection attempts in a short time
-- Behavior: Multiple ports scanned across the target system
 
-This pattern is consistent with reconnaissance activity, specifically port scanning.
+- MITRE ATT&CK:T1046 – Network Service Discovery (reconnaissance). The attacker is mapping open services before selecting an exploit.
+- Evidence: the source `192.168.56.101` touched 1001 distinct destination ports; all connections show a `REJ` state, meaning the ports were closed and the scan found no open services.
+- Threshold: > 20` is a baseline; in production it would be tuned to the environment's normal traffic. At 1001 ports the activity is unambiguous.
+- False positives:vulnerability scanners (Nessus, OpenVAS) and asset-discovery tools also touch many ports. Triage confirms whether the source is a sanctioned scanner before escalating.
+  Triage steps:confirm the source isn't a sanctioned scanner → note the `REJ` states (scan found no open ports) → determine what was targeted → block and escalate if unsanctioned.
 
--- Detection Outcome
-
---- Detection Outcome
-
-The attack was successfully detected by correlating repeated TCP connection attempts from a single source IP.
-
-The identified behavior clearly indicates port scanning activity originating from 192.168.56.101.
+.
   --📸 Screenshots
 
 ![Detection](detection.png)
 
----
 
--- 🛠️ Tools & Technologies
+
+--- Tools & Technologies
 
 * Zeek
 * Splunk Enterprise
@@ -79,18 +79,16 @@ The identified behavior clearly indicates port scanning activity originating fro
 * Nmap
 * Ubuntu Linux
 
----
+## Key Learnings
 
--  Key Learnings
+* Built an end-to-end SOC pipeline: Zeek sensor → log forwarding → Splunk SIEM
+* Wrote a detection that counts distinct destination ports per source to isolate scanning from normal traffic
+* Extracted fields from raw Zeek logs with `rex` when they weren't auto-parsed
+* Mapped the activity to MITRE ATT&CK (T1046 – Network Service Discovery)
+* Troubleshot real-world issues: locating data across indexes, correcting the index name, handling raw log parsing
 
-* Built end-to-end SOC pipeline
-* Log analysis using Splunk
-* Detection of reconnaissance attacks
-* Troubleshooting real-world issues
 
----
-
--- Conclusion
+--- Conclusion
 
 Successfully built a SOC lab and detected a port scanning attack using Zeek and Splunk.
 
