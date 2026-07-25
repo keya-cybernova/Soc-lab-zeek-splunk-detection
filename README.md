@@ -74,9 +74,6 @@ The source `192.168.56.101` touched **1001 distinct destination ports** — far 
 
 ![Port scan detection result](detection-result2.png)
 
-![Detection](detection.png)
-
-
 
 --- Tools & Technologies
 
